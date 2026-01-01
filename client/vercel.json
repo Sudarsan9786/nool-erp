@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://nool-erp-server.vercel.app/api/$1"
+      "destination": "https://nool-erp-test.vercel.app/api/$1"
     }
   ]
 }
