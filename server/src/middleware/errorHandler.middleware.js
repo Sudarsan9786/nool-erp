@@ -2,11 +2,16 @@
  * Error Handler Middleware
  */
 export const errorHandler = (err, req, res, next) => {
+  // Check if response has already been sent
+  if (res.headersSent) {
+    return next(err);
+  }
+
   let error = { ...err };
   error.message = err.message;
 
   // Log error
-  console.error(err);
+  console.error('Error Handler:', err);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -26,10 +31,23 @@ export const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 400 };
   }
 
-  res.status(error.statusCode || 500).json({
-    success: false,
-    error: error.message || 'Server Error'
-  });
+  // JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    error = { message: 'Invalid token', statusCode: 401 };
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    error = { message: 'Token expired', statusCode: 401 };
+  }
+
+  try {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      error: error.message || 'Server Error'
+    });
+  } catch (sendError) {
+    console.error('Failed to send error response:', sendError);
+  }
 };
 
 export default errorHandler;

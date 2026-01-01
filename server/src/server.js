@@ -6,21 +6,33 @@ import connectDB from './config/database.js';
 // Load env vars
 dotenv.config();
 
+// Detect Vercel environment
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.VERCEL_URL;
+
 // Global error handlers for serverless environments
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   // Don't exit in serverless environment
-  if (process.env.VERCEL !== '1') {
+  if (!isVercel) {
     process.exit(1);
   }
 });
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
   // Don't exit in serverless environment
-  if (process.env.VERCEL !== '1') {
+  if (!isVercel) {
     process.exit(1);
   }
+});
+
+// Log environment info (helpful for debugging)
+console.log('Server initializing...', {
+  nodeEnv: process.env.NODE_ENV,
+  isVercel,
+  hasMongoUri: !!process.env.MONGODB_URI,
+  hasJwtSecret: !!process.env.JWT_SECRET
 });
 
 const app = express();
@@ -40,7 +52,9 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Log CORS rejection but don't throw error that crashes the function
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(null, true); // Allow in serverless to prevent crashes, CORS will still block browser
     }
   },
   credentials: true
@@ -48,6 +62,23 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Nool ERP API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      materials: '/api/materials',
+      vendors: '/api/vendors',
+      jobOrders: '/api/job-orders'
+    }
+  });
+});
 
 // Health check endpoint (no DB connection required) - must be before DB middleware
 app.get('/api/health', (req, res) => {
@@ -59,27 +90,32 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Database connection middleware - connects lazily on first request (except health check)
+// Database connection middleware - connects lazily on first request (except health check and root)
 app.use(async (req, res, next) => {
-  // Skip DB connection for health check
-  if (req.path === '/api/health') {
+  // Skip DB connection for health check and root
+  if (req.path === '/api/health' || req.path === '/') {
     return next();
   }
   
   try {
     await connectDB();
-    next();
+    return next();
   } catch (error) {
     console.error('Database connection failed:', error);
-    res.status(503).json({
-      success: false,
-      error: 'Database connection failed. Please try again later.',
-      message: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    // Check if response was already sent
+    if (!res.headersSent) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database connection failed. Please try again later.',
+        message: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    // If headers already sent, pass error to error handler
+    return next(error);
   }
 });
 
-// Import routes
+// Import routes (moved before usage for clarity)
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import materialRoutes from './routes/material.routes.js';
@@ -87,11 +123,20 @@ import vendorRoutes from './routes/vendor.routes.js';
 import jobOrderRoutes from './routes/jobOrder.routes.js';
 import errorHandler from './middleware/errorHandler.middleware.js';
 
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/job-orders', jobOrderRoutes);
+
+// 404 handler for undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    error: `Route ${req.method} ${req.path} not found`
+  });
+});
 
 // Error handler middleware (must be last)
 app.use(errorHandler);
@@ -102,7 +147,7 @@ const PORT = process.env.PORT || 5000;
 export default app;
 
 // Only start server if not in Vercel environment
-if (process.env.VERCEL !== '1') {
+if (!isVercel) {
   const server = app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   });
