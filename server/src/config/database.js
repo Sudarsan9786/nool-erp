@@ -46,9 +46,13 @@ const connectDB = async () => {
     console.log(`Attempting MongoDB connection to: ${uriPreview}`);
 
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000, // Increased to 10s for Vercel
+      serverSelectionTimeoutMS: 15000, // Increased to 15s for Vercel
       socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-      connectTimeoutMS: 10000, // Connection timeout
+      connectTimeoutMS: 15000, // Connection timeout
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 2, // Maintain at least 2 socket connections
+      bufferMaxEntries: 0, // Disable mongoose buffering in serverless
+      bufferCommands: false, // Disable mongoose buffering in serverless
     });
     
     isConnected = true;

@@ -314,15 +314,18 @@ app.use(async (req, res, next) => {
       let userMessage = 'Database connection failed. Please try again later.';
       let solution = 'Check your MongoDB Atlas configuration';
 
-      if (error.name === 'MongoServerSelectionError') {
+      if (error.name === 'MongoServerSelectionError' || error.message?.includes('buffering')) {
         userMessage = 'Cannot reach MongoDB servers. Check IP whitelist.';
-        solution = 'Add 0.0.0.0/0 to MongoDB Atlas Network Access';
+        solution = 'CRITICAL: Add 0.0.0.0/0 to MongoDB Atlas Network Access → Add IP Address';
       } else if (error.name === 'MongoAuthenticationError') {
         userMessage = 'MongoDB authentication failed. Check credentials.';
         solution = 'Verify username and password in connection string';
       } else if (error.message?.includes('ENOTFOUND')) {
         userMessage = 'Invalid MongoDB connection string format.';
         solution = 'Connection string should start with mongodb+srv://';
+      } else if (error.message?.includes('timeout') || error.message?.includes('buffering')) {
+        userMessage = 'Connection timeout - MongoDB unreachable';
+        solution = 'Add 0.0.0.0/0 to MongoDB Atlas IP whitelist';
       }
 
       return res.status(503).json({
