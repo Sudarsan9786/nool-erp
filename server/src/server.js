@@ -102,8 +102,97 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Health check without /api prefix
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Nool ERP Server is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Database health check endpoint - tests DB connection
 app.get('/api/health/db', async (req, res) => {
+  try {
+    // Check if MONGODB_URI is set
+    if (!process.env.MONGODB_URI) {
+      return res.status(503).json({
+        status: 'ERROR',
+        error: 'MONGODB_URI environment variable is not set',
+        diagnostic: {
+          hasMongoUri: false,
+          nodeEnv: process.env.NODE_ENV,
+          isVercel: !!(process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.VERCEL_URL),
+          timestamp: new Date().toISOString()
+        },
+        solution: 'Please set MONGODB_URI in Vercel environment variables'
+      });
+    }
+
+    await connectDB();
+    const dbState = mongoose.connection.readyState;
+    const states = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    };
+    
+    res.json({
+      status: dbState === 1 ? 'OK' : 'ERROR',
+      database: {
+        state: states[dbState] || 'unknown',
+        readyState: dbState,
+        host: mongoose.connection.host || 'unknown',
+        name: mongoose.connection.name || 'unknown',
+        connected: dbState === 1
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    // Extract more detailed error information
+    const errorDetails = {
+      name: error.name || 'Unknown',
+      message: error.message || 'Unknown error',
+      code: error.code || 'N/A',
+      hasMongoUri: !!process.env.MONGODB_URI,
+      uriLength: process.env.MONGODB_URI?.length || 0,
+      uriPreview: process.env.MONGODB_URI ? 
+        process.env.MONGODB_URI.substring(0, 30) + '...' : 'Not set'
+    };
+
+    // Add specific error messages based on error type
+    let userMessage = 'Database connection failed';
+    let solution = 'Please check your MongoDB Atlas configuration';
+
+    if (error.name === 'MongoServerSelectionError') {
+      userMessage = 'Cannot reach MongoDB servers';
+      solution = 'Check MongoDB Atlas IP whitelist - add 0.0.0.0/0 to allow all IPs';
+    } else if (error.name === 'MongoAuthenticationError') {
+      userMessage = 'MongoDB authentication failed';
+      solution = 'Check your username and password in the connection string';
+    } else if (error.message?.includes('ENOTFOUND') || error.message?.includes('getaddrinfo')) {
+      userMessage = 'Cannot resolve MongoDB hostname';
+      solution = 'Check your connection string format - should start with mongodb+srv://';
+    } else if (error.message?.includes('timeout')) {
+      userMessage = 'Connection timeout';
+      solution = 'Check MongoDB Atlas IP whitelist and ensure cluster is running';
+    }
+
+    res.status(503).json({
+      status: 'ERROR',
+      error: userMessage,
+      message: error.message,
+      details: errorDetails,
+      solution: solution,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Database health check without /api prefix
+app.get('/health/db', async (req, res) => {
   try {
     // Check if MONGODB_URI is set
     if (!process.env.MONGODB_URI) {
@@ -184,7 +273,8 @@ app.get('/api/health/db', async (req, res) => {
 // Database connection middleware - connects lazily on first request (except health check and root)
 app.use(async (req, res, next) => {
   // Skip DB connection for health check endpoints and root
-  if (req.path === '/api/health' || req.path === '/api/health/db' || req.path === '/') {
+  if (req.path === '/api/health' || req.path === '/api/health/db' || 
+      req.path === '/health' || req.path === '/health/db' || req.path === '/') {
     return next();
   }
   
@@ -253,12 +343,19 @@ app.use(async (req, res, next) => {
   }
 });
 
-// API Routes
+// API Routes (with /api prefix)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/job-orders', jobOrderRoutes);
+
+// Also support routes without /api prefix for convenience
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/materials', materialRoutes);
+app.use('/vendors', vendorRoutes);
+app.use('/job-orders', jobOrderRoutes);
 
 // 404 handler for undefined routes
 app.use((req, res, next) => {
