@@ -6,8 +6,22 @@ import connectDB from './config/database.js';
 // Load env vars
 dotenv.config();
 
-// Connect to database
-connectDB();
+// Global error handlers for serverless environments
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit in serverless environment
+  if (process.env.VERCEL !== '1') {
+    process.exit(1);
+  }
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Don't exit in serverless environment
+  if (process.env.VERCEL !== '1') {
+    process.exit(1);
+  }
+});
 
 const app = express();
 
@@ -35,9 +49,34 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Health check endpoint (no DB connection required) - must be before DB middleware
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Nool ERP Server is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Nool ERP Server is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Database connection middleware - connects lazily on first request (except health check)
+app.use(async (req, res, next) => {
+  // Skip DB connection for health check
+  if (req.path === '/api/health') {
+    return next();
+  }
+  
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    res.status(503).json({
+      success: false,
+      error: 'Database connection failed. Please try again later.',
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });
 
 // Import routes
