@@ -51,9 +51,11 @@ const connectDB = async () => {
       connectTimeoutMS: 15000, // Connection timeout
       maxPoolSize: 10, // Maintain up to 10 socket connections
       minPoolSize: 2, // Maintain at least 2 socket connections
-      bufferMaxEntries: 0, // Disable mongoose buffering in serverless
-      bufferCommands: false, // Disable mongoose buffering in serverless
     });
+    
+    // Disable mongoose buffering for serverless environments
+    mongoose.set('bufferCommands', false);
+    mongoose.set('bufferMaxEntries', 0);
     
     isConnected = true;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
