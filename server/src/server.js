@@ -2,6 +2,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/database.js';
+// Import routes at top level (ES modules hoist these anyway)
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import materialRoutes from './routes/material.routes.js';
+import vendorRoutes from './routes/vendor.routes.js';
+import jobOrderRoutes from './routes/jobOrder.routes.js';
+import errorHandler from './middleware/errorHandler.middleware.js';
 
 // Load env vars
 dotenv.config();
@@ -27,13 +34,17 @@ process.on('uncaughtException', (error) => {
   }
 });
 
-// Log environment info (helpful for debugging)
-console.log('Server initializing...', {
-  nodeEnv: process.env.NODE_ENV,
-  isVercel,
-  hasMongoUri: !!process.env.MONGODB_URI,
-  hasJwtSecret: !!process.env.JWT_SECRET
-});
+// Log environment info (helpful for debugging) - wrapped in try-catch to prevent crashes
+try {
+  console.log('Server initializing...', {
+    nodeEnv: process.env.NODE_ENV,
+    isVercel,
+    hasMongoUri: !!process.env.MONGODB_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET
+  });
+} catch (logError) {
+  console.error('Error logging initialization:', logError);
+}
 
 const app = express();
 
@@ -114,14 +125,6 @@ app.use(async (req, res, next) => {
     return next(error);
   }
 });
-
-// Import routes (moved before usage for clarity)
-import authRoutes from './routes/auth.routes.js';
-import userRoutes from './routes/user.routes.js';
-import materialRoutes from './routes/material.routes.js';
-import vendorRoutes from './routes/vendor.routes.js';
-import jobOrderRoutes from './routes/jobOrder.routes.js';
-import errorHandler from './middleware/errorHandler.middleware.js';
 
 // API Routes
 app.use('/api/auth', authRoutes);

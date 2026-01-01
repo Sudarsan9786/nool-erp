@@ -61,7 +61,8 @@ const connectDB = async () => {
     console.error(`MongoDB Connection Error: ${error.message}`);
     isConnected = false;
     // Don't exit process in serverless environment
-    if (process.env.VERCEL !== '1') {
+    const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.VERCEL_URL;
+    if (!isVercel) {
       process.exit(1);
     }
     throw error;
