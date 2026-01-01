@@ -31,20 +31,38 @@ const connectDB = async () => {
 
   try {
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
+      const errorMsg = 'MONGODB_URI is not defined in environment variables';
+      console.error(`MongoDB Connection Error: ${errorMsg}`);
+      console.error('Environment check:', {
+        hasMongoUri: !!process.env.MONGODB_URI,
+        nodeEnv: process.env.NODE_ENV,
+        isVercel: !!(process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.VERCEL_URL)
+      });
+      throw new Error(errorMsg);
     }
 
+    // Log connection attempt (without exposing full URI)
+    const uriPreview = process.env.MONGODB_URI.substring(0, 20) + '...';
+    console.log(`Attempting MongoDB connection to: ${uriPreview}`);
+
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      serverSelectionTimeoutMS: 10000, // Increased to 10s for Vercel
       socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      connectTimeoutMS: 10000, // Connection timeout
     });
     
     isConnected = true;
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`Database: ${conn.connection.name}`);
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {
       console.error('MongoDB connection error:', err);
+      console.error('Error details:', {
+        name: err.name,
+        message: err.message,
+        code: err.code
+      });
       isConnected = false;
     });
 
@@ -59,6 +77,14 @@ const connectDB = async () => {
     });
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      reason: error.reason?.message || 'Unknown',
+      hasMongoUri: !!process.env.MONGODB_URI,
+      uriLength: process.env.MONGODB_URI?.length || 0
+    });
     isConnected = false;
     // Don't exit process in serverless environment
     const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.VERCEL_URL;
