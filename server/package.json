@@ -1,0 +1,36 @@
+{
+  "name": "nool-erp-server",
+  "version": "1.0.0",
+  "description": "Nool ERP Backend - Textile Manufacturing ERP",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed:vendors": "node src/scripts/seedVendors.js",
+    "seed:users": "node src/scripts/seedUsers.js",
+    "seed:materials": "node src/scripts/seedMaterials.js",
+    "fix:passwords": "node src/scripts/fixUserPasswords.js"
+  },
+  "keywords": ["erp", "textile", "manufacturing"],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "joi": "^17.11.0",
+    "cors": "^2.8.5",
+    "pdfkit": "^0.14.0",
+    "qrcode": "^1.5.3",
+    "twilio": "^4.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

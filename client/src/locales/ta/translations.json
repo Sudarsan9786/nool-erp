@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "வரவேற்கிறோம்",
+    "login": "உள்நுழை",
+    "logout": "வெளியேற",
+    "dashboard": "டாஷ்போர்டு",
+    "inventory": "சரக்கு",
+    "jobOrders": "வேலை ஆர்டர்கள்",
+    "vendors": "விற்பனையாளர்கள்",
+    "materials": "பொருட்கள்",
+    "users": "பயனர்கள்",
+    "settings": "அமைப்புகள்",
+    "save": "சேமி",
+    "cancel": "ரத்துசெய்",
+    "delete": "நீக்கு",
+    "edit": "திருத்து",
+    "create": "உருவாக்கு",
+    "search": "தேடு",
+    "filter": "வடிகட்டு",
+    "status": "நிலை",
+    "actions": "செயல்கள்",
+    "loading": "ஏற்றுகிறது...",
+    "error": "பிழை",
+    "success": "வெற்றி"
+  },
+  "auth": {
+    "email": "மின்னஞ்சல்",
+    "password": "கடவுச்சொல்",
+    "name": "பெயர்",
+    "role": "பங்கு",
+    "loginTitle": "நூல் ERP-இல் உள்நுழைய",
+    "registerTitle": "புதிய பயனரை பதிவு செய்",
+    "forgotPassword": "கடவுச்சொல் மறந்துவிட்டதா?",
+    "rememberMe": "என்னை நினைவில் கொள்"
+  },
+  "dashboard": {
+    "title": "டாஷ்போர்டு",
+    "materialAtVendor": "விற்பனையாளரிடம் உள்ள பொருள்",
+    "totalJobOrders": "மொத்த வேலை ஆர்டர்கள்",
+    "activeVendors": "செயலில் உள்ள விற்பனையாளர்கள்",
+    "processLoss": "செயல்முறை இழப்பு",
+    "recentJobOrders": "சமீபத்திய வேலை ஆர்டர்கள்",
+    "inventorySummary": "சரக்கு சுருக்கம்"
+  },
+  "jobOrder": {
+    "create": "வேலை ஆர்டர் உருவாக்கு",
+    "jobOrderNumber": "வேலை ஆர்டர் எண்",
+    "vendor": "விற்பனையாளர்",
+    "jobWorkType": "வேலை வகை",
+    "materialsIssued": "வழங்கப்பட்ட பொருட்கள்",
+    "materialsReceived": "பெறப்பட்ட பொருட்கள்",
+    "expectedCompletion": "எதிர்பார்க்கப்படும் முடிவு",
+    "actualCompletion": "உண்மையான முடிவு",
+    "challan": "சல்லான்",
+    "downloadChallan": "சல்லான் பதிவிறக்கு",
+    "receiveMaterials": "பொருட்களை பெறு",
+    "scanQR": "QR குறியீட்டை ஸ்கேன் செய்"
+  },
+  "material": {
+    "materialType": "பொருள் வகை",
+    "quantity": "அளவு",
+    "unit": "அலகு",
+    "currentLocation": "தற்போதைய இடம்",
+    "batchNumber": "தொகுதி எண்",
+    "addMaterial": "பொருள் சேர்"
+  },
+  "vendor": {
+    "vendorName": "விற்பனையாளர் பெயர்",
+    "contactPerson": "தொடர்பு நபர்",
+    "phone": "தொலைபேசி",
+    "whatsapp": "வாட்ஸ்அப்",
+    "address": "முகவரி",
+    "gstin": "GSTIN",
+    "addVendor": "விற்பனையாளர் சேர்"
+  }
+}
+

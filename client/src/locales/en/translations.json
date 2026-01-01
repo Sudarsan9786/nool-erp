@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "jobOrders": "Job Orders",
+    "vendors": "Vendors",
+    "materials": "Materials",
+    "users": "Users",
+    "settings": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "status": "Status",
+    "actions": "Actions",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "role": "Role",
+    "loginTitle": "Login to Nool ERP",
+    "registerTitle": "Register New User",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "materialAtVendor": "Material at Vendor",
+    "totalJobOrders": "Total Job Orders",
+    "activeVendors": "Active Vendors",
+    "processLoss": "Process Loss",
+    "recentJobOrders": "Recent Job Orders",
+    "inventorySummary": "Inventory Summary"
+  },
+  "jobOrder": {
+    "create": "Create Job Order",
+    "jobOrderNumber": "Job Order Number",
+    "vendor": "Vendor",
+    "jobWorkType": "Job Work Type",
+    "materialsIssued": "Materials Issued",
+    "materialsReceived": "Materials Received",
+    "expectedCompletion": "Expected Completion",
+    "actualCompletion": "Actual Completion",
+    "challan": "Challan",
+    "downloadChallan": "Download Challan",
+    "receiveMaterials": "Receive Materials",
+    "scanQR": "Scan QR Code"
+  },
+  "material": {
+    "materialType": "Material Type",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "currentLocation": "Current Location",
+    "batchNumber": "Batch Number",
+    "addMaterial": "Add Material"
+  },
+  "vendor": {
+    "vendorName": "Vendor Name",
+    "contactPerson": "Contact Person",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "address": "Address",
+    "gstin": "GSTIN",
+    "addVendor": "Add Vendor"
+  }
+}
+
