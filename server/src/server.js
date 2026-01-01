@@ -175,9 +175,9 @@ app.get('/api/health/db', async (req, res) => {
     } else if (error.message?.includes('ENOTFOUND') || error.message?.includes('getaddrinfo')) {
       userMessage = 'Cannot resolve MongoDB hostname';
       solution = 'Check your connection string format - should start with mongodb+srv://';
-    } else if (error.message?.includes('timeout')) {
-      userMessage = 'Connection timeout';
-      solution = 'Check MongoDB Atlas IP whitelist and ensure cluster is running';
+    } else if (error.message?.includes('timeout') || error.message?.includes('buffering')) {
+      userMessage = 'Connection timeout - MongoDB servers unreachable';
+      solution = 'CRITICAL: Add 0.0.0.0/0 to MongoDB Atlas IP whitelist (Network Access)';
     }
 
     res.status(503).json({
@@ -254,9 +254,9 @@ app.get('/health/db', async (req, res) => {
     } else if (error.message?.includes('ENOTFOUND') || error.message?.includes('getaddrinfo')) {
       userMessage = 'Cannot resolve MongoDB hostname';
       solution = 'Check your connection string format - should start with mongodb+srv://';
-    } else if (error.message?.includes('timeout')) {
-      userMessage = 'Connection timeout';
-      solution = 'Check MongoDB Atlas IP whitelist and ensure cluster is running';
+    } else if (error.message?.includes('timeout') || error.message?.includes('buffering')) {
+      userMessage = 'Connection timeout - MongoDB servers unreachable';
+      solution = 'CRITICAL: Add 0.0.0.0/0 to MongoDB Atlas IP whitelist (Network Access)';
     }
 
     res.status(503).json({
