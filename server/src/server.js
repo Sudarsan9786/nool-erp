@@ -183,8 +183,8 @@ app.get('/api/health/db', async (req, res) => {
 
 // Database connection middleware - connects lazily on first request (except health check and root)
 app.use(async (req, res, next) => {
-  // Skip DB connection for health check and root
-  if (req.path === '/api/health' || req.path === '/') {
+  // Skip DB connection for health check endpoints and root
+  if (req.path === '/api/health' || req.path === '/api/health/db' || req.path === '/') {
     return next();
   }
   
